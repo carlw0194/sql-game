@@ -155,7 +155,7 @@ class Transaction(Base):
     currency = Column(String(3), nullable=False, default="USD")
     status = Column(Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDING)
     description = Column(String(200), nullable=True)
-    metadata = Column(String(1000), nullable=True)  # JSON string for additional data
+    transaction_metadata = Column(String(1000), nullable=True)  # JSON string for additional data (renamed from 'metadata' which is reserved)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
