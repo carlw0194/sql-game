@@ -71,6 +71,11 @@ class User(Base):
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     leaderboard_entries = relationship("LeaderboardEntry", back_populates="user", cascade="all, delete-orphan")
     
+    # Payment and subscription relationships
+    payment_methods = relationship("PaymentMethod", back_populates="user", cascade="all, delete-orphan")
+    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
+    transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
+    
     def __repr__(self):
         """String representation of the User object."""
         return f"<User {self.username} (ID: {self.id})>"

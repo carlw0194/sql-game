@@ -17,3 +17,10 @@ from app.schemas.progress import (
     SkillTreeBase, SkillTreeCreate, SkillTreeUpdate, 
     SkillTreeInResponse, UserSkillInResponse, UserProgressSummary
 )
+from app.schemas.payment import (
+    PaymentMethodBase, CardPaymentMethodCreate, MobileMoneyPaymentMethodCreate,
+    PayoneerPaymentMethodCreate, PaymentMethodCreate, PaymentMethodResponse,
+    PricingPlanBase, PricingPlanCreate, PricingPlanResponse,
+    SubscriptionBase, SubscriptionCreate, SubscriptionResponse,
+    TransactionBase, TransactionCreate, TransactionResponse
+)

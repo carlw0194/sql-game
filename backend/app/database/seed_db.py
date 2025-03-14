@@ -15,6 +15,7 @@ from app.models.leaderboard import LeaderboardEntry, LeaderboardType
 from app.models.progress import Achievement, AchievementCategory, SkillTree, UserSkill
 from app.core.security import get_password_hash
 import datetime
+from app.database.seed_payment_data import seed_pricing_plans
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -431,9 +432,12 @@ def seed_database():
         # Seed skill trees
         seed_skill_trees(db)
         
-        logger.info("Database seeding completed successfully!")
+        # Seed payment data
+        seed_pricing_plans(db)
+        
+        logger.info("Database seeding completed successfully.")
     except Exception as e:
-        logger.error(f"Error seeding database: {str(e)}")
+        logger.error(f"Error during database seeding: {str(e)}")
         raise
     finally:
         db.close()
