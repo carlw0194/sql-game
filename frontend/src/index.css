@@ -1,0 +1,82 @@
+/* Import Tailwind CSS base styles */
+@tailwind base;
+/* Import Tailwind CSS component styles */
+@tailwind components;
+/* Import Tailwind CSS utility styles */
+@tailwind utilities;
+
+/* Root variables and base styles */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom utility classes for the SQL Scenario game */
+@layer components {
+  /* Primary button style for main actions */
+  .btn-primary {
+    @apply bg-primary text-white rounded-md hover:bg-blue-600 transition-colors px-4 py-2;
+  }
+  
+  /* Secondary button style for alternative actions */
+  .btn-secondary {
+    @apply bg-secondary text-white rounded-md hover:bg-green-600 transition-colors px-4 py-2;
+  }
+  
+  /* Card component for consistent container styling */
+  .card {
+    @apply bg-surface rounded-lg shadow-lg p-4;
+  }
+  
+  /* SQL editor container styling */
+  .sql-editor {
+    @apply bg-gray-900 rounded-md overflow-hidden border border-gray-700;
+  }
+  
+  /* Game level item styling */
+  .level-item {
+    @apply flex items-center rounded-md cursor-pointer transition-colors p-3;
+  }
+  
+  /* Active/selected level styling */
+  .level-item.active {
+    @apply bg-primary bg-opacity-20 border-l-4 border-primary;
+  }
+}
+
+/* Base element styling */
+body {
+  @apply bg-background text-white m-0 min-h-screen;
+}
+
+h1 {
+  @apply text-3xl font-bold;
+}
+
+h2 {
+  @apply text-2xl font-semibold;
+}
+
+h3 {
+  @apply text-xl font-medium;
+}
+
+a {
+  @apply text-primary hover:text-blue-400 transition-colors;
+}
+
+/* Dark/light mode preferences */
+@media (prefers-color-scheme: light) {
+  :root {
+    @apply text-gray-800;
+  }
+  body {
+    @apply bg-gray-100;
+  }
+}

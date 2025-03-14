@@ -1,0 +1,64 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import './index.css';
+
+// Import page components
+import HomePage from './pages/HomePage';
+import CareerModePage from './pages/CareerModePage';
+import SandboxPage from './pages/SandboxPage';
+import LevelPage from './pages/LevelPage';
+import MultiplayerPage from './pages/MultiplayerPage';
+import SettingsPage from './pages/SettingsPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import ChallengeResultsPage from './pages/ChallengeResultsPage';
+import ChallengePage from './pages/ChallengePage';
+
+/**
+ * App Component
+ * 
+ * This is the main application component that sets up routing for the SQL Scenario game.
+ * It uses React Router to navigate between different pages of the application.
+ * 
+ * The routing structure includes:
+ * - Home page (landing page): Entry point for the application
+ * - Career Mode: Progressive level-based learning path with structured challenges
+ * - Sandbox Mode: Free-form SQL practice environment with various datasets
+ * - Level Page: Individual level details and challenge interface
+ * - Challenge Page: The main gameplay screen where players solve SQL challenges
+ * - Challenge Results: Detailed feedback after completing a challenge
+ * - Multiplayer Mode: Competitive SQL challenges against other players
+ * - Leaderboard: Global and friend rankings to track progress and competition
+ * - Settings Page: User preferences and configuration options
+ * 
+ * Each route is mapped to its corresponding component, with parameters passed
+ * where needed (such as levelId for the Level Page or challengeId for the Challenge Results).
+ * 
+ * The routing system allows for a smooth navigation experience between different
+ * sections of the application, maintaining state and context as needed.
+ * 
+ * @returns {JSX.Element} The rendered application with routing configuration
+ */
+function App() {
+  return (
+    <Router>
+      <Routes>
+        {/* Home page route */}
+        <Route path="/" element={<HomePage />} />
+        
+        {/* Game mode routes */}
+        <Route path="/career" element={<CareerModePage />} />
+        <Route path="/sandbox" element={<SandboxPage />} />
+        <Route path="/level/:levelId" element={<LevelPage />} />
+        <Route path="/challenge/:levelId" element={<ChallengePage />} />
+        <Route path="/challenge-results/:challengeId" element={<ChallengeResultsPage />} />
+        <Route path="/multiplayer" element={<MultiplayerPage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        
+        {/* Fallback route - redirects to home if path doesn't match */}
+        <Route path="*" element={<HomePage />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
