@@ -26,6 +26,8 @@ def seed_users(db: Session):
     Seed the database with initial users.
     
     Creates admin and regular user accounts for development and testing.
+    These accounts can be used to test different user roles and permissions
+    in the application.
     """
     logger.info("Seeding users...")
     
@@ -34,10 +36,10 @@ def seed_users(db: Session):
         email="admin@sqlgame.com",
         username="admin",
         hashed_password=get_password_hash("adminpassword"),
-        full_name="Admin User",
+        display_name="Admin User",
         role=UserRole.ADMIN,
-        avatar_type=AvatarType.SYSTEM,
-        avatar_url="admin_avatar.png",
+        avatar_type=AvatarType.DBA,  # Using DBA avatar type instead of SYSTEM
+        avatar_customization='{"color": "red", "accessories": ["glasses"]}',
         is_active=True,
         created_at=datetime.datetime.utcnow()
     )
@@ -47,10 +49,10 @@ def seed_users(db: Session):
         email="user@sqlgame.com",
         username="testuser",
         hashed_password=get_password_hash("userpassword"),
-        full_name="Test User",
-        role=UserRole.USER,
-        avatar_type=AvatarType.SYSTEM,
-        avatar_url="user_avatar.png",
+        display_name="Test User",
+        role=UserRole.PLAYER,  # Using PLAYER role instead of USER
+        avatar_type=AvatarType.DEVELOPER,  # Using DEVELOPER avatar type
+        avatar_customization='{"color": "blue", "accessories": ["hat"]}',
         is_active=True,
         created_at=datetime.datetime.utcnow()
     )
@@ -79,13 +81,12 @@ def seed_challenges(challenge_db: Session):
             title="Select All Employees",
             description="Write a query to select all employees from the 'employees' table.",
             difficulty=DifficultyLevel.BEGINNER,
-            type=ChallengeType.SELECT,
-            points=10,
-            initial_sql="-- Write your SELECT query here\n\n",
-            expected_result="JSON representation of all employees",
-            solution="SELECT * FROM employees;",
-            hint="Use the SELECT statement with * to retrieve all columns.",
-            schema_sql="""
+            challenge_type=ChallengeType.QUERY_WRITING,
+            level_number=1,
+            xp_reward=10,
+            initial_code="-- Write your SELECT query here\n\n",
+            expected_solution="SELECT * FROM employees;",
+            schema_definition="""
             CREATE TABLE employees (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -100,19 +101,19 @@ def seed_challenges(challenge_db: Session):
                 (3, 'Bob Johnson', 'Engineering', 80000, '2018-11-10'),
                 (4, 'Alice Brown', 'HR', 60000, '2021-03-01'),
                 (5, 'Charlie Wilson', 'Marketing', 70000, '2020-07-25');
-            """
+            """,
+            test_data='{"expected_rows": 5, "expected_columns": ["id", "name", "department", "salary", "hire_date"]}'
         ),
         Challenge(
             title="Filter by Department",
             description="Write a query to select all employees from the Engineering department.",
             difficulty=DifficultyLevel.BEGINNER,
-            type=ChallengeType.SELECT,
-            points=15,
-            initial_sql="-- Write your query to filter by department\n\n",
-            expected_result="JSON representation of Engineering employees",
-            solution="SELECT * FROM employees WHERE department = 'Engineering';",
-            hint="Use the WHERE clause to filter results by the department column.",
-            schema_sql="""
+            challenge_type=ChallengeType.QUERY_WRITING,
+            level_number=2,
+            xp_reward=15,
+            initial_code="-- Write your query to filter by department\n\n",
+            expected_solution="SELECT * FROM employees WHERE department = 'Engineering';",
+            schema_definition="""
             CREATE TABLE employees (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -127,7 +128,8 @@ def seed_challenges(challenge_db: Session):
                 (3, 'Bob Johnson', 'Engineering', 80000, '2018-11-10'),
                 (4, 'Alice Brown', 'HR', 60000, '2021-03-01'),
                 (5, 'Charlie Wilson', 'Marketing', 70000, '2020-07-25');
-            """
+            """,
+            test_data='{"expected_rows": 2, "expected_columns": ["id", "name", "department", "salary", "hire_date"], "expected_values": {"department": ["Engineering"]}}'
         )
     ]
     
@@ -137,13 +139,12 @@ def seed_challenges(challenge_db: Session):
             title="Join Orders and Customers",
             description="Write a query to join the orders and customers tables to show all orders with customer names.",
             difficulty=DifficultyLevel.INTERMEDIATE,
-            type=ChallengeType.JOIN,
-            points=25,
-            initial_sql="-- Write your JOIN query here\n\n",
-            expected_result="JSON representation of joined tables",
-            solution="SELECT o.id, o.order_date, o.amount, c.name FROM orders o JOIN customers c ON o.customer_id = c.id;",
-            hint="Use the JOIN keyword to combine tables based on the customer_id.",
-            schema_sql="""
+            challenge_type=ChallengeType.QUERY_WRITING,
+            level_number=101,
+            xp_reward=25,
+            initial_code="-- Write your JOIN query here\n\n",
+            expected_solution="SELECT o.id, o.order_date, o.amount, c.name FROM orders o JOIN customers c ON o.customer_id = c.id;",
+            schema_definition="""
             CREATE TABLE customers (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -169,7 +170,8 @@ def seed_challenges(challenge_db: Session):
                 (2, 1, '2020-05-15', 149.99),
                 (3, 2, '2020-04-20', 49.99),
                 (4, 3, '2020-06-25', 199.99);
-            """
+            """,
+            test_data='{"expected_rows": 4, "expected_columns": ["id", "order_date", "amount", "name"]}'
         )
     ]
     
@@ -179,11 +181,11 @@ def seed_challenges(challenge_db: Session):
             title="Complex Aggregation",
             description="Write a query to find the total sales by department and month, sorted by month and then by total sales in descending order.",
             difficulty=DifficultyLevel.ADVANCED,
-            type=ChallengeType.AGGREGATE,
-            points=40,
-            initial_sql="-- Write your aggregation query here\n\n",
-            expected_result="JSON representation of aggregated results",
-            solution="""
+            challenge_type=ChallengeType.QUERY_WRITING,
+            level_number=301,
+            xp_reward=40,
+            initial_code="-- Write your aggregation query here\n\n",
+            expected_solution="""
             SELECT 
                 d.name AS department,
                 strftime('%Y-%m', s.sale_date) AS month,
@@ -199,8 +201,7 @@ def seed_challenges(challenge_db: Session):
             ORDER BY 
                 month, total_sales DESC;
             """,
-            hint="Use GROUP BY with multiple columns and the strftime function to format dates.",
-            schema_sql="""
+            schema_definition="""
             CREATE TABLE departments (
                 id INTEGER PRIMARY KEY,
                 name TEXT NOT NULL
@@ -222,9 +223,9 @@ def seed_challenges(challenge_db: Session):
             );
             
             INSERT INTO departments VALUES
-                (1, 'Electronics'),
-                (2, 'Clothing'),
-                (3, 'Home Goods');
+                (1, 'Engineering'),
+                (2, 'Marketing'),
+                (3, 'Sales');
                 
             INSERT INTO employees VALUES
                 (1, 'John Doe', 1),
@@ -234,17 +235,18 @@ def seed_challenges(challenge_db: Session):
                 (5, 'Charlie Wilson', 2);
                 
             INSERT INTO sales VALUES
-                (1, 1, '2022-01-15', 1200.00),
-                (2, 1, '2022-01-20', 800.00),
-                (3, 2, '2022-01-10', 950.00),
-                (4, 3, '2022-01-25', 1500.00),
-                (5, 4, '2022-02-05', 700.00),
-                (6, 5, '2022-02-10', 1100.00),
-                (7, 1, '2022-02-15', 900.00),
-                (8, 2, '2022-02-20', 1300.00),
-                (9, 3, '2022-02-25', 600.00),
-                (10, 4, '2022-02-28', 1000.00);
-            """
+                (1, 1, '2020-01-15', 1000),
+                (2, 1, '2020-01-20', 500),
+                (3, 2, '2020-01-10', 750),
+                (4, 3, '2020-02-05', 1200),
+                (5, 4, '2020-02-10', 950),
+                (6, 5, '2020-02-15', 800),
+                (7, 1, '2020-02-20', 1100),
+                (8, 2, '2020-03-05', 700),
+                (9, 3, '2020-03-10', 1300),
+                (10, 4, '2020-03-15', 850);
+            """,
+            test_data='{"expected_rows": 7, "expected_columns": ["department", "month", "total_sales"]}'
         )
     ]
     
@@ -263,149 +265,183 @@ def seed_achievements(db: Session):
     Seed the database with achievements that users can earn.
     
     Creates various achievement categories and specific achievements within each category.
+    These achievements provide goals and rewards for players as they progress through
+    the SQL learning game.
     """
     logger.info("Seeding achievements...")
     
-    # Create achievement categories
-    categories = [
-        AchievementCategory(name="Beginner", description="Achievements for beginners"),
-        AchievementCategory(name="Intermediate", description="Achievements for intermediate users"),
-        AchievementCategory(name="Advanced", description="Achievements for advanced users"),
-        AchievementCategory(name="Mastery", description="Achievements for SQL masters")
+    # Check if achievements already exist
+    existing_achievements = db.query(Achievement).count()
+    if existing_achievements > 0:
+        logger.info("Achievements already exist, skipping.")
+        return
+    
+    # Define achievements
+    achievements = [
+        # Query Mastery achievements
+        Achievement(
+            code="first_select",
+            title="SELECT Apprentice",
+            description="Write your first SELECT query",
+            category=AchievementCategory.QUERY_MASTERY,
+            requirement_description="Complete your first basic SELECT challenge",
+            xp_reward=50,
+            badge_image_url="badges/select_apprentice.png"
+        ),
+        Achievement(
+            code="join_master",
+            title="JOIN Master",
+            description="Successfully use complex joins",
+            category=AchievementCategory.QUERY_MASTERY,
+            requirement_description="Complete 5 JOIN challenges",
+            xp_reward=100,
+            badge_image_url="badges/join_master.png"
+        ),
+        
+        # Optimization achievements
+        Achievement(
+            code="speed_demon",
+            title="Speed Demon",
+            description="Optimize a query to run in under 100ms",
+            category=AchievementCategory.OPTIMIZATION,
+            requirement_description="Optimize a query to run in under 100ms on a large dataset",
+            xp_reward=150,
+            badge_image_url="badges/speed_demon.png"
+        ),
+        
+        # Security achievements
+        Achievement(
+            code="injection_blocker",
+            title="Injection Blocker",
+            description="Successfully prevent SQL injection",
+            category=AchievementCategory.SECURITY,
+            requirement_description="Fix 3 SQL injection vulnerabilities",
+            xp_reward=200,
+            badge_image_url="badges/injection_blocker.png"
+        ),
+        
+        # General achievements
+        Achievement(
+            code="challenge_streak",
+            title="Challenge Streak",
+            description="Complete 5 challenges in a row",
+            category=AchievementCategory.GENERAL,
+            requirement_description="Complete 5 challenges without failing",
+            xp_reward=75,
+            badge_image_url="badges/challenge_streak.png"
+        )
     ]
     
+    # Add achievements to database
+    for achievement in achievements:
+        db.add(achievement)
+    
     try:
-        for category in categories:
-            db.add(category)
         db.commit()
-        
-        # Get the categories we just created
-        categories = db.query(AchievementCategory).all()
-        category_dict = {cat.name: cat.id for cat in categories}
-        
-        # Create achievements
-        achievements = [
-            # Beginner achievements
-            Achievement(
-                name="First Query",
-                description="Run your first SQL query",
-                category_id=category_dict["Beginner"],
-                points=5,
-                icon="first_query.png"
-            ),
-            Achievement(
-                name="SELECT Master",
-                description="Complete 5 SELECT challenges",
-                category_id=category_dict["Beginner"],
-                points=10,
-                icon="select_master.png"
-            ),
-            
-            # Intermediate achievements
-            Achievement(
-                name="JOIN Expert",
-                description="Complete 5 JOIN challenges",
-                category_id=category_dict["Intermediate"],
-                points=15,
-                icon="join_expert.png"
-            ),
-            Achievement(
-                name="Data Manipulator",
-                description="Complete 5 INSERT/UPDATE/DELETE challenges",
-                category_id=category_dict["Intermediate"],
-                points=20,
-                icon="data_manipulator.png"
-            ),
-            
-            # Advanced achievements
-            Achievement(
-                name="Aggregation Guru",
-                description="Complete 5 aggregation challenges",
-                category_id=category_dict["Advanced"],
-                points=25,
-                icon="aggregation_guru.png"
-            ),
-            Achievement(
-                name="Subquery Wizard",
-                description="Complete 5 subquery challenges",
-                category_id=category_dict["Advanced"],
-                points=30,
-                icon="subquery_wizard.png"
-            ),
-            
-            # Mastery achievements
-            Achievement(
-                name="SQL Master",
-                description="Complete all challenges",
-                category_id=category_dict["Mastery"],
-                points=50,
-                icon="sql_master.png"
-            ),
-            Achievement(
-                name="Performance Optimizer",
-                description="Optimize 5 queries for better performance",
-                category_id=category_dict["Mastery"],
-                points=40,
-                icon="performance_optimizer.png"
-            )
-        ]
-        
-        for achievement in achievements:
-            db.add(achievement)
-        db.commit()
-        logger.info("Achievements seeded successfully.")
-    except IntegrityError:
+        logger.info(f"Successfully seeded {len(achievements)} achievements")
+    except Exception as e:
         db.rollback()
-        logger.info("Some achievements already exist, skipping.")
+        logger.error(f"Error seeding achievements: {str(e)}")
+        raise
 
 def seed_skill_trees(db: Session):
     """
     Seed the database with skill trees for user progression.
     
     Creates skill trees with various SQL skills that users can unlock.
+    Each skill represents a specific SQL concept or technique that players
+    can master as they progress through the game.
     """
     logger.info("Seeding skill trees...")
     
-    # Create skill trees
-    skill_trees = [
+    # Check if skill trees already exist
+    existing_skills = db.query(SkillTree).count()
+    if existing_skills > 0:
+        logger.info("Skill trees already exist, skipping.")
+        return
+    
+    # Define basic skills (no prerequisites)
+    basic_skills = [
         SkillTree(
-            name="Basic SQL",
-            description="Fundamental SQL skills",
+            code="basic_select",
+            name="Basic SELECT",
+            description="Learn to retrieve data using basic SELECT statements",
+            category="Query Writing",
             level=1,
-            icon="basic_sql.png",
-            prerequisites=None
+            xp_required=0  # First skill, no XP required
         ),
         SkillTree(
-            name="Intermediate SQL",
-            description="More advanced SQL concepts",
-            level=2,
-            icon="intermediate_sql.png",
-            prerequisites="Basic SQL"
+            code="basic_where",
+            name="WHERE Clause",
+            description="Filter results using the WHERE clause",
+            category="Query Writing",
+            level=1,
+            xp_required=50
         ),
         SkillTree(
-            name="Advanced SQL",
-            description="Complex SQL techniques",
-            level=3,
-            icon="advanced_sql.png",
-            prerequisites="Intermediate SQL"
-        ),
-        SkillTree(
-            name="SQL Optimization",
-            description="SQL performance optimization",
-            level=4,
-            icon="sql_optimization.png",
-            prerequisites="Advanced SQL"
+            code="basic_order",
+            name="ORDER BY",
+            description="Sort results using ORDER BY",
+            category="Query Writing",
+            level=1,
+            xp_required=100
         )
     ]
     
+    # Add basic skills to database
+    for skill in basic_skills:
+        db.add(skill)
+    
     try:
-        for skill_tree in skill_trees:
-            db.add(skill_tree)
         db.commit()
-        logger.info("Skill trees seeded successfully.")
-    except IntegrityError:
+        logger.info("Basic skills seeded successfully.")
+        
+        # Get the skills we just created to use as prerequisites
+        basic_select = db.query(SkillTree).filter(SkillTree.code == "basic_select").first()
+        basic_where = db.query(SkillTree).filter(SkillTree.code == "basic_where").first()
+        basic_order = db.query(SkillTree).filter(SkillTree.code == "basic_order").first()
+        
+        # Define intermediate skills (with prerequisites)
+        intermediate_skills = [
+            SkillTree(
+                code="basic_join",
+                name="Basic JOINs",
+                description="Combine data from multiple tables using JOINs",
+                category="Query Writing",
+                level=2,
+                parent_skill_id=basic_select.id,
+                xp_required=200
+            ),
+            SkillTree(
+                code="basic_aggregation",
+                name="Basic Aggregation",
+                description="Use aggregate functions like COUNT, SUM, AVG",
+                category="Query Writing",
+                level=2,
+                parent_skill_id=basic_select.id,
+                xp_required=250
+            ),
+            SkillTree(
+                code="advanced_filtering",
+                name="Advanced Filtering",
+                description="Use complex WHERE conditions with AND, OR, NOT",
+                category="Query Writing",
+                level=2,
+                parent_skill_id=basic_where.id,
+                xp_required=300
+            )
+        ]
+        
+        # Add intermediate skills to database
+        for skill in intermediate_skills:
+            db.add(skill)
+            
+        db.commit()
+        logger.info(f"Successfully seeded {len(basic_skills) + len(intermediate_skills)} skill tree items")
+    except Exception as e:
         db.rollback()
-        logger.info("Some skill trees already exist, skipping.")
+        logger.error(f"Error seeding skill trees: {str(e)}")
+        raise
 
 def seed_database():
     """
